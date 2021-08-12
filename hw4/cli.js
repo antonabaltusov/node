@@ -40,10 +40,10 @@ const readFile = (path) => {
 }
 
 const showList = async () => {
+    console.clear()
 
 let list = fs.readdirSync(executionDir);
 list.unshift('..')
-console.log(list);
 
 const item = await inquirer
     .prompt([
