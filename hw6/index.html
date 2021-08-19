@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>socket app</title>
+    <script src="https://cdn.socket.io/3.1.1/socket.io.min.js" integrity="sha384-gDaozqUvc4HTgo8iZjwth73C6dDDeOJsAgpxBcMpZYztUfjHXpzrpdrHRdVp8ySO" crossorigin="anonymous"></script>
+</head>
+<body>
+    <input type="text" id="input" autofocus>
+    <input type="submit" id="send" value="Send">
+    <div id="messages"></div>    
+</body>
+
+<script type="text/javascript">
+    const socket = io('localhost:3000');
+  
+    const addMessage = (msg) => {
+      const msgSpan = document.createElement('span').innerHTML = msg;
+      document.getElementById('messages').append(msgSpan);
+      document.getElementById('messages').append(document.createElement('br'));
+    };
+
+    const clienMessage = () => {
+        let message = document.getElementById('input').value;
+        socket.emit('CLIENT_MSG', { msg: message });
+        addMessage(`Я: ${message}`);
+        document.getElementById('input').value = '';
+    }
+  
+    socket.on('SERVER_MSG', function (data) {
+      addMessage(data.msg);
+    });
+
+    socket.on('NEW_CONN_EVENT', function (data) {
+        addMessage(data.msg);
+    });
+
+    document.getElementById('input').addEventListener('keydown', function(e) {
+        if (e.keyCode === 13)clienMessage();
+    });
+  
+    document.getElementById('send').onclick = () => clienMessage();
+  </script>
+</html>
