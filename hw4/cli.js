@@ -5,9 +5,21 @@ const inquirer = require("inquirer");
 const { join } = require("path");
 const yargs = require("yargs");
 const { lstatSync } = require("fs");
+const worker_threads = require('worker_threads');
+
+const research = (data) => {
+    return new Promise((resolve, reject) => {
+        const worker = new worker_threads.Worker("./worker.js", {
+            workerData: data
+        });
+
+        worker.on("message", resolve);
+        worker.on("error", reject);
+    });
+}
 
 const options = yargs
-	.usage("Usage: -d <directory>, -p <path>" )
+	.usage("Usage: -d <directory>, -p <pattern>" )
 	.option("d", { 
         alias: "directory", 
         describe: "path to directory", 
@@ -32,10 +44,12 @@ const readFile = (path) => {
     if(options.p === null) {
         console.log(data);
     } else {
-        const lines = data.split("\n");
-        lines
-            .filter(line => new RegExp(options.p).test(line))
-            .forEach(console.log);
+        (async () => {
+            const {result} = await research([data, options.p]);
+            result.forEach(element => {
+                console.log(element);
+            });
+        })();
     }
 }
 
