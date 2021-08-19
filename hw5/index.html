@@ -6,10 +6,49 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>App</title>
+    <script src="https://cdn.socket.io/3.1.1/socket.io.min.js" integrity="sha384-gDaozqUvc4HTgo8iZjwth73C6dDDeOJsAgpxBcMpZYztUfjHXpzrpdrHRdVp8ySO" crossorigin="anonymous"></script>
 </head>
 <body>
+<div><span>сейчас онлайн:</span><span id="clint_count_onlain"></span></div>
 <ul>
     #links
 </ul>
 </body>
+<script type="text/javascript">
+    const socket = io('localhost:3000');
+  
+    const addMessage = (msg) => {
+    console.log('work addmessage');
+      document.getElementById('clint_count_onlain').innerHTML = msg;
+    };
+
+    socket.on('CHANGE_CLIENT_COUNT', (data) => {
+      addMessage(data.msg);
+    });
+
+    const clienMessage = () => {
+        let message = document.getElementById('input').value;
+        socket.emit('CLIENT_MSG', { msg: message });
+        addMessage(`Я: ${message}`);
+        document.getElementById('input').value = '';
+    }
+  
+    socket.on('connect', function() {
+      console.log('Successful connected to server');
+    });
+  
+    socket.on('SERVER_MSG', function (data) {
+      addMessage(data.msg);
+    });
+
+    socket.on('NEW_CONN_EVENT', function (data) {
+        addMessage(data.msg);
+    });
+
+    document.getElementById('input').addEventListener('keydown', function(e) {
+        if (e.keyCode === 13)clienMessage();
+    });
+  
+    document.getElementById('send').onclick = () => clienMessage();
+  </script>
 </html>
